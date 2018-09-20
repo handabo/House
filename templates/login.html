@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+    <head>
+        <meta charset="utf-8" >
+        <title>房天下 - 用户登录</title>
+        <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}">
+        <style>
+            #hint, #uerror, #perror {
+                color: red;
+                font-size: 12px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="header" class="wrap">
+            <div id="logo">
+                <img src="{% static 'images/logo.png' %}">
+            </div>
+        </div>
+        <div id="regLogin" class="wrap">
+            <div class="dialog">
+                <div class="box">
+                    <h4>用户登录</h4>
+                    <form id="loginForm" action="/user/login/" method="post">
+                        {% csrf_token %}
+                        <div class="infos">
+                            <table class="field">
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td id="hint">{{hint}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="field"><label for="username">用 户 名：</label></td>
+                                    <td>
+                                        <input id="username" type="text" class="text" name="username">
+                                        <span id="uerror">{{uerror}}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="field"><label for="password">密 码：</label></td>
+                                    <td>
+                                        <input id="password" type="password" class="text" name="password">
+                                        <span id="perror">{{perror}}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="field"><label for="codeStr">验 证 码：</label></td>
+                                    <td>
+                                        <input id="captcha" type="text" class="text" name="captcha">
+                                        <img id="captchaImage" src="/common/captcha" width="80" height="30">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="auto"></label>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" name="auto" id="auto">
+                                        <label>下次自动登录</label>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="buttons">
+                                <input type="submit" value="立即登录">
+                                <input id="regBtn" type="button" value="快速注册">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id="footer" class="wrap">
+            <dl>
+                <dt>&copy; 北京拓世宏业科技发展有限公司 版权所有</dt>
+                <dd>京ICP备17002856号</dd>
+                <dd>关于我们 · 联系方式 · 意见反馈 · 帮助中心</dd>
+            </dl>
+        </div>
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script>
+            $(function() {
+                $('#regBtn').on('click', function() {
+                    location.href = '/user/register';
+                });
+                $('#captchaImage').on('click', function(evt) {
+                    $(evt.target).attr('src', '/common/captcha?' + Math.random())
+                });
+            });
+        </script>
+    </body>
+</html>
+
+

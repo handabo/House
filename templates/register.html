@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>房天下 - 用户注册</title>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}">
+        <style>
+            .hint { font-size: 12px; }
+        </style>
+    </head>
+	<body>
+		<div id="header" class="wrap">
+			<div id="logo">
+				<img src="{% static 'images/logo.png' %}">
+			</div>
+		</div>
+		<div id="regLogin" class="wrap">
+			<div class="dialog">
+				<dl class="clearfix">
+					<dt>新用户注册</dt>
+					<dd class="past">填写个人信息</dd>
+				</dl>
+				<div class="box">
+					<form id="registerForm" action="/user/register/" method="post">
+                        {% csrf_token %}
+						<div class="infos">
+							<table class="field">
+								<tr>
+									<td>&nbsp;</td>
+									<td id="errorHint" style="color: red">{{hint}}</td>
+								</tr>
+								<tr>
+									<td class="field">用 户 名：</td>
+									<td>
+										<input id="username" type="text" class="text" name="username"> 
+										<span id="isValid"></span>
+									</td>
+								</tr>
+								<tr>
+									<td class="field">密 码：</td>
+									<td>
+                                        <input type="password" class="text" name="password">
+                                    </td>
+								</tr>
+								<tr>
+									<td class="field">确认密码：</td>
+									<td>
+                                        <input type="password" class="text" name="repassword">
+                                    </td>
+								</tr>
+								<tr>
+									<td class="field">真实姓名：</td>
+									<td>
+                                        <input type="text" class="text" name="realname">
+                                    </td>
+								</tr>
+                                <tr>
+									<td class="field">手 机 号：</td>
+									<td>
+                                        <input type="tel" class="text" name="tel">
+                                        <input id="codeBtn" type="button" value="获取验证码">
+                                    </td>
+								</tr>
+                                 <tr>
+									<td class="field">电子邮箱：</td>
+									<td>
+                                        <input type="email" class="text" name="email">
+                                    </td>
+								</tr>
+                                <tr>
+									<td class="field">验 证 码：</td>
+									<td>
+                                        <input type="text" class="text" name="code">
+                                    </td>
+								</tr>
+                                <tr id="codeHint" style="visibility: hidden">
+                                    <td class="field"></td>
+                                    <td>
+                                        <img src="{% static 'images/ok.png' %}">
+                                        <span class="hint">验证码已发送到你的手机，打死也不能告诉别人</span>
+                                    </td>
+                                </tr>
+							</table>
+							<div class="buttons">
+								<input type="submit" value="立即注册">
+                                <input id="toLoginBtn" type="button" value="返回登录">
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div id="footer" class="wrap">
+			<dl>
+				<dt>&copy; 北京拓世宏业科技发展有限公司 版权所有</dt>
+				<dd>京ICP备17002856号</dd>
+				<dd>关于我们 · 联系方式 · 意见反馈 · 帮助中心</dd>
+			</dl>
+		</div>
+		<script src="{% static 'js/jquery.min.js' %}"></script>
+		<script type="text/javascript">
+            $(function() {
+                var errorList = $('#errorHint>ul ul');
+                $('#errorHint>ul').remove();
+                $('#errorHint').append(errorList.clone(true, true));
+
+                $('#toLoginBtn').on('click', function() {
+                    location.href = '/user/login';
+                });
+
+                $('#codeBtn').on('click', function(evt) {
+                    var pattern = /^1[3-9]\d{9}$/i;
+                    var tel = $('input[name=tel]').val().trim();
+                    if (pattern.test(tel)) {
+                        var btn = evt.target;
+                        btn.disabled = true;
+                        var hint = $(btn).val();
+                        $.ajax({
+                            'url': '/api/mobile_code/' + tel,
+                            'type': 'get',
+                            'dataType': 'json',
+                            'success': function (json) {
+                                if (json.code == 200) {
+                                    $('#codeHint').css('visibility', 'visible');
+                                } else {
+                                    alert(json.msg);
+                                }
+                            }
+                        });
+                        var countdown = 60;
+                        $(btn).val(hint + '(' + countdown + ')');
+                        setTimeout(function () {
+                            countdown -= 1;
+                            if (countdown == 0) {
+                                $(btn).val(hint);
+                                btn.disabled = false;
+                            } else {
+                                $(btn).val(hint + '(' + countdown + ')');
+                                setTimeout(arguments.callee, 1000);
+                            }
+                        }, 1000);
+                    } else {
+                        alert('请输入正确的手机号');
+                    }
+                });
+            });
+        </script>
+	</body>
+</html>

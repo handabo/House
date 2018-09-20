@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>房天下 - 首页</title>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}">
+		<style type="text/css">
+			#headbar { position: relative; top: 5px; left: 350px; }
+            #headbar a { vertical-align: bottom; text-decoration: none; }
+			.count { display: inline-block; width: 25px; height: 25px; opacity: 0.7; background-color: black; position: relative; left: 60px; top: -40px; }
+			.pub { display: inline-block; margin-left: 35px; background-color: rgb(180,0,5); height: 36px; }
+			.pub a { display: inline-block; text-decoration: none; width: 125px; height: 36px; text-align: center; font-size: 16px; line-height: 36px; }
+			.pub a:visited, .pub a:link { color: white; }
+            select { display: inline-block; width: 80px; height: 20px; }
+		</style>
+	</head>
+	<body>
+        {% include 'header.html' %}
+        {% include 'nav.html' %}
+		<div class="main wrap">
+			<table class="house-list">
+				{% for house in house_list %}
+				<tr>
+					<td class="house-thumb">
+						<div>
+							<img src="{% static 'images/upload/house.main_photo' %}" width="160" height="120" alt="">
+							<span class="count">1图</span>
+						</div>
+					</td>
+					<td>
+						<dl>
+							<dt>
+								<a href="">{{house.title}}</a>
+							</dt>
+							<dd>
+								{{house.district.name}}&nbsp;{{house.street}}&nbsp;
+								{{house.area}}平米&nbsp;{{house.floor}}层/{{house.total_floor}}层 <br>
+								联系人：{{house.contact_name}}
+								联系方式：{{house.contact_tel}}
+							</dd>
+						</dl>
+					</td>
+					<td class="house-type">{{house.house_type.name}}</td>
+					<td class="house-price"><span>{{house.price}}</span>元/月</td>
+				</tr>
+				{% endfor %}
+			</table>
+			<div class="pager">
+				<ul>
+					<li class="current"><a href="?page=1">首页</a></li>
+					{% if has_prev_page %}
+					<li><a href="?page={{prev_page}}">上一页</a></li>
+					{% endif %}
+					{% if has_next_page %}
+					<li><a href="page={{next_page}}">下一页</a></li>
+					{% endif %}
+					<li><a href="?page={{total_page}}">末页</a></li>
+				</ul>
+				<span class="total">{{current_page}}/{{total_page}}页</span>
+			</div>
+		</div>
+        {% include 'footer.html' %}
+	</body>
+</html>

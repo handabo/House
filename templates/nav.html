@@ -1,0 +1,132 @@
+<div id="navbar" class="wrap">
+    <form method="post" action="" id="search">
+        {% csrf_token %}
+        <div class="search clearfix">
+            <div class="fl">
+                <ul>
+                    <li class="bold">房屋信息</li>
+                    <li>标题：
+                        <input type="text" class="text" name="title" value="">
+                        <label class="ui-blue">
+                        <input type="submit" name="search" value="搜索房屋">
+                    </label>
+                    </li>
+                </ul>
+            </div>
+            <div class="fl">
+                <ul>
+                    <li class="first">价格</li>
+                    <li>
+                        <select id="price" name="price">
+                            <option value='不限'>不限</option>
+                            <option value='0-1000'>1000元以下</option>
+                            <option value='1000-2000'>1000元—2000元</option>
+                            <option value='2000-3000'>2000元—3000元</option>
+                            <option value='3000-5000'>3000元—5000元</option>
+                            <option value='5000-8000'>5000元—8000元</option>
+                            <option value='8000-20000'>8000元—20000元</option>
+                            <option value='20000-99999999'>20000元以上</option>
+                        </select>
+                    </li>
+                </ul>
+            </div>
+            <div class="fl">
+                <ul>
+                    <li class="first">房屋位置</li>
+                    <li>
+                        省
+                        <select  id="prov" class="text" name="province.id">
+                            <option value="0">请选择</option>
+                        </select>
+                        市
+                        <select id="city" name="city">
+                            <option value="0">不限</option>
+                        </select>
+                        区
+                        <select id="dist" name="dist">
+                            <option value="0">不限</option>
+                        </select>
+                    </li>
+                </ul>
+            </div>
+            <div class="fl">
+                <ul>
+                    <li class="first">房型</li>
+                    <li>
+                        <select id="housetype" name="housetype">
+                            <option value="0">不限</option>
+                        </select>
+                    </li>
+                </ul>
+            </div>
+            <div class="fl">
+                <ul>
+                    <li class="first">面积</li>
+                    <li>
+                        <select id="area" name="area">
+                            <option value="不限">不限</option>
+                            <option value="0-40">40以下</option>
+                            <option value="40-80">40-80</option>
+                            <option value="80-140">80-140</option>
+                            <option value="140-200">140-200</option>
+                            <option value="200-1000000">200以上</option>
+                        </select>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script>
+    // jquery的$函数大致有四种用法:
+    // 1. 传入函数 - 该函数是页面加载完成之后要执行的回调函数
+    // 2. 传入CSS选择器 - 获取DOM元素并处理成jQuery对象
+    // 3. 传入标签字符串 - 创建DOM元素并处理成jQuery对象
+    // 4. 传入原生JS对象 - 将原生JS对象转成jQuery对象
+    $(function() {
+        function get_house_type_data() {
+            $.ajax({
+                'url': '/api/housetypes',
+                'type': 'get',
+                'dataType': 'json',
+                'success': function (json) {
+                    for (var i = 0; i < json.length; i += 1) {
+                        var type = json[i];
+                        var $option = $('<option>').val(type.typeid).text(type.name);
+                        $('#housetype').append($option);
+                    }
+                }
+            });
+        }
+
+        function get_district_data(pid, elemId) {
+            var url = '/api/districts/' + (pid ? pid : '');
+            $.ajax({
+                'url': url,
+                'type': 'get',
+                'dataType': 'json',
+                'success': function (json) {
+                    for (var i = 0; i < json.length; i += 1) {
+                        var district = json[i];
+                        var $option = $('<option>').val(district.distid).text(district.name);
+                        $('#' + elemId).append($option);
+                    }
+                }
+            });
+        }
+
+        $('#prov').on('change', function(evt) {
+            $('#city>option:gt(0)').remove();
+            $('#dist>option:gt(0)').remove();
+            get_district_data($(evt.target).val(), 'city');
+        });
+        $('#city').on('change', function(evt) {
+            $('#dist>option:gt(0)').remove();
+            get_district_data($(evt.target).val(), 'dist');
+        });
+
+        get_house_type_data();
+        get_district_data(null, 'prov');
+    });
+</script>

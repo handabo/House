@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>房天下 - 发布房源</title>
+		<link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}">
+		<style type="text/css">
+			.addbutton, .minusbutton { width: 30px; height: 30px; font-size: 18px; }
+			.minusbutton { margin-left: 5px; }
+			td img { margin:5px 5px; }
+			#headbar { position: relative; top: 5px; left: 350px; }
+            #headbar a { vertical-align: bottom; text-decoration: none; }
+			.count { display: inline-block; width: 25px; height: 25px; opacity: 0.7; background-color: black; position: relative; left: 60px; top: -40px; }
+			.pub { display: inline-block; margin-left: 35px; background-color: rgb(180,0,5); height: 36px; }
+			.pub a { display: inline-block; text-decoration: none; width: 125px; height: 36px; text-align: center; font-size: 16px; line-height: 36px; }
+			.pub a:visited, .pub a:link { color: white; }
+            select { display: inline-block; width: 80px; height: 20px; }
+		</style>
+	</head>
+	<body>
+		{% include 'header.html' %}
+		<div id="regLogin" class="wrap">
+			<div class="dialog">
+				<dl class="clearfix">
+					<dt>新房屋信息发布</dt>
+					<dd class="past">填写房屋信息</dd>
+				</dl>
+				<div class="box">
+					<form action="" method="post" enctype="multipart/form-data">
+						{% csrf_token %}
+                        <div style="color:red;">{{hint}}</div>
+						<div class="infos">
+							<table class="field">
+								<tr>
+									<td class="field">标 题：</td>
+									<td><input type="text" class="text" name="title"></td>
+								</tr>
+								<tr>
+									<td class="field">户 型：</td>
+									<td>
+                                        <select class="text" id="housetype" name="housetype">
+                                            <option value="0">不限</option>
+                                        </select>
+								   </td>
+								</tr>
+								<tr>
+									<td class="field">面 积：</td>
+									<td><input type="number" class="mtext" name="area"></td>
+								</tr>
+								<tr>
+									<td class="field">楼 层：</td>
+									<td>
+										<input type="number" name="floor" class="stext" maxlength="3">
+										/
+										<input type="number" name="totalFloor" class="stext" maxlength="3">
+									</td>
+								</tr>
+                                <tr>
+									<td class="field">朝 向：</td>
+									<td>
+										<input type="text" name="direction" class="stext" maxlength="3">
+									</td>
+								</tr>
+								<tr>
+									<td class="field">价 格：</td>
+									<td>
+                                        <input type="number" class="mtext" name="price">
+                                        <select name="priceunit">
+                                            <option value="元/月">元/月</option>
+                                            <option value="元/平方米">元/平方米</option>
+                                        </select>
+                                    </td>
+								</tr>
+                                <tr>
+									<td class="field">省市区：</td>
+									<td>
+                                        <select  id="prov" class="text" name="province.id">
+                                            <option value="0">请选择</option>
+                                        </select>
+                                        <select id="city" name="city">
+                                            <option value="0">不限</option>
+                                        </select>
+                                        <select id="dist" name="dist">
+                                            <option value="0">不限</option>
+                                        </select>
+		                            </td>
+								</tr>
+								<tr>
+									<td class="field">街 道：</td>
+									<td>
+										<input type="text" name="street" class="text">
+									</td>
+								</tr>
+                                <tr>
+									<td class="field">其 他：</td>
+									<td>
+										<input type="checkbox" name="hassubway">地铁开通&nbsp;&nbsp;
+                                        <input type="checkbox" name="isshared">支持合租&nbsp;&nbsp;
+                                        <input type="checkbox" name="hasagentfees">有中介费
+									</td>
+								</tr>
+								<tr>
+									<td class="field">联系人：</td>
+									<td><input type="text" class="text" name="contacter.name"></td>
+								</tr>
+		                        <tr>
+									<td class="field">联系电话：</td>
+									<td><input type="tel" class="text" name="contacter.tel"></td>
+								</tr>
+								<tr>
+									<td class="field">上传图片：</td>
+									<td>
+										<input id="file" type="file" class="text" name="mainphoto">
+										<input id="addbutton" type="button" value="+" class="addbutton">
+									</td>
+								</tr>
+								<tr>
+									<td class="field">图片预览：</td>
+									<td id="prevArea">
+                                        <img id="housePhoto" width="160" height="120">
+                                    </td>
+								</tr>
+		                        <tr>
+									<td class="field">详细信息：</td>
+									<td>
+                                        <textarea name="detail"></textarea>
+                                    </td>
+								</tr>
+							</table>
+							<div class="buttons"><input type="submit" value="立即发布"></div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		{% include 'footer.html' %}
+		<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+		<script type="text/javascript">
+			$(function() {
+                $(function() {
+                    function get_house_type_data() {
+                        $.ajax({
+                            'url': '/api/housetypes',
+                            'type': 'get',
+                            'dataType': 'json',
+                            'success': function (json) {
+                                for (var i = 0; i < json.length; i += 1) {
+                                    var type = json[i];
+                                    var $option = $('<option>').val(type.typeid).text(type.name);
+                                    $('#housetype').append($option);
+                                }
+                            }
+                        });
+                    }
+
+                    function get_district_data(pid, elemId) {
+                        var url = '/api/districts/' + (pid ? pid : '');
+                        $.ajax({
+                            'url': url,
+                            'type': 'get',
+                            'dataType': 'json',
+                            'success': function (json) {
+                                for (var i = 0; i < json.length; i += 1) {
+                                    var district = json[i];
+                                    var $option = $('<option>').val(district.distid).text(district.name);
+                                    $('#' + elemId).append($option);
+                                }
+                            }
+                        });
+                    }
+
+                    $('#prov').on('change', function(evt) {
+                        $('#city>option:gt(0)').remove();
+                        $('#dist>option:gt(0)').remove();
+                        get_district_data($(evt.target).val(), 'city');
+                    });
+
+                    $('#city').on('change', function(evt) {
+                        $('#dist>option:gt(0)').remove();
+                        get_district_data($(evt.target).val(), 'dist');
+                    });
+
+                    get_house_type_data();
+                    get_district_data(null, 'prov');
+                });
+
+				
+				$('#addbutton').on('click', function(evt) {
+					var tr = $(evt.target).parent().parent();
+					var img = $('<img>').attr('width', 160).attr('height', 120);
+					$('#prevArea').append(img);
+					var newTr = $('<tr>');
+					var newTd1 = $('<td class="field"></td>');
+					var newTd2 = $('<td>');
+					var fileInput = $('<input type="file" name="photo" class="text"/>');
+					fileInput.on('change', function() {
+						doPreview(this, img);
+					});
+					var minusButton = $('<input type="button" value="-" class="minusbutton"/>');
+					minusButton.on('click', function() {
+						newTr.remove();
+						img.remove();
+					});
+					newTd2.append(fileInput).append(minusButton);
+					newTr.append(newTd1).append(newTd2);
+					tr.after(newTr);
+				});
+				
+				$('#file').on('change', function(evt) {
+					doPreview(evt.target, $('#housePhoto'));
+				});
+
+
+                function doPreview(source, target) {
+                    var file = source.files[0];
+                    if (/image\/\w+/.test(file.type)) {
+                        if (window.FileReader) {
+                            var fr = new FileReader();
+                            fr.onloadend = function () {
+                                target.attr('src', this.result);
+                            };
+                            fr.readAsDataURL(file);
+                        } else {
+                            alert('你的浏览器不支持文件预览功能!')
+                        }
+                    } else {
+                        alert("只能选择图片文件!");
+                        source.value = "";
+                        target.attr('src', '');
+                    }
+                }
+			});
+		</script>
+	</body>
+</html>

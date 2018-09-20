@@ -1,0 +1,20 @@
+{% load staticfiles %}
+<div id="header" class="wrap">
+    <div id="logo">
+        <img src="{% static 'images/logo.png' %}">
+    </div>
+    <div id="headbar">
+        {% if request.session.userid %}
+        <a href="">{{ request.session.realname }}</a>&nbsp;&nbsp;
+        <a href="/user/logout">注销</a>
+        {% else %}
+        <a href="/user/login">用户登录</a>
+        {% endif %}
+        <a href="/user/register">快速注册</a>
+        <div class="pub">
+            {% if request.session.userid %}
+            <a href="/rent/publish">发布房源</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
